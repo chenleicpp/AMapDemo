@@ -5,6 +5,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.amap.api.maps.AMap;
+import com.amap.api.maps.CameraUpdateFactory;
+import com.amap.api.maps.MapView;
 import com.tbruyelle.rxpermissions2.Permission;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 
@@ -14,6 +17,9 @@ public class MainActivity extends AppCompatActivity {
 
     public static final String TAG = "AMapDemo";
 
+    private AMap aMap;
+    private MapView mapView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -21,7 +27,20 @@ public class MainActivity extends AppCompatActivity {
 
         requestPermissions();
 
+        mapView = findViewById(R.id.map);
+        mapView.onCreate(savedInstanceState);
 
+        initMap();
+    }
+
+    private void initMap(){
+        if (aMap == null) {
+            aMap = mapView.getMap();
+            aMap.getUiSettings().setRotateGesturesEnabled(false);
+            aMap.getUiSettings().setMyLocationButtonEnabled(true);
+            aMap.moveCamera(CameraUpdateFactory.zoomBy(6));
+            aMap.setMyLocationEnabled(true);
+        }
     }
 
     private void requestPermissions(){
@@ -49,5 +68,27 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mapView.onResume();
+    }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mapView.onPause();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        mapView.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mapView.onDestroy();
+    }
 }
