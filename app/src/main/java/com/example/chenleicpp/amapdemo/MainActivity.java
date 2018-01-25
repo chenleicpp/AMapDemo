@@ -1,42 +1,65 @@
 package com.example.chenleicpp.amapdemo;
 
 import android.Manifest;
-import android.graphics.Color;
-import android.location.Location;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.widget.Toast;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
 
 import com.amap.api.maps.AMap;
 import com.amap.api.maps.CameraUpdateFactory;
 import com.amap.api.maps.MapView;
+import com.amap.api.maps.model.BitmapDescriptor;
 import com.amap.api.maps.model.BitmapDescriptorFactory;
+import com.amap.api.maps.model.LatLng;
+import com.amap.api.maps.model.Marker;
+import com.amap.api.maps.model.MarkerOptions;
 import com.amap.api.maps.model.MyLocationStyle;
 import com.tbruyelle.rxpermissions2.Permission;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 
 import io.reactivex.functions.Consumer;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements AMap.OnMapClickListener,View.OnClickListener{
 
     public static final String TAG = "AMapDemo";
 
     private AMap aMap;
     private MapView mapView;
+    private MarkerOptions markerOptions;
+    private BitmapDescriptor ICON_RED = BitmapDescriptorFactory
+            .defaultMarker(BitmapDescriptorFactory.HUE_RED);
+
+    private Button mBtnAdd;
+    private Button mBtnDel;
+    private TextView mTvResult;
+
+    private LatLng centerLatLng = null;
+    private Marker centerMarker;
+
+    private static final String GEOFENCE_BROADCAST_ACTION = "com.example.geofence.round";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        mBtnAdd = findViewById(R.id.btn_add_geofence);
+        mBtnDel = findViewById(R.id.btn_clear_geofence);
+        mTvResult = findViewById(R.id.tv_result);
+
         requestPermissions();
 
         mapView = findViewById(R.id.map);
         mapView.onCreate(savedInstanceState);
+        markerOptions = new MarkerOptions();
 
         initMap();
     }
+
+
 
     private void initMap(){
         if (aMap == null) {
@@ -48,6 +71,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setUpMap() {
+        aMap.setOnMapClickListener(this);
         MyLocationStyle myLocationStyle;
         myLocationStyle = new MyLocationStyle();//初始化定位蓝点样式类myLocationStyle.myLocationType(MyLocationStyle.LOCATION_TYPE_LOCATION_ROTATE);//连续定位、且将视角移动到地图中心点，定位点依照设备方向旋转，并且会跟随设备移动。（1秒1次定位）如果不设置myLocationType，默认也会执行此种模式。
         myLocationStyle.interval(2000); //设置连续定位模式下的定位间隔，只在连续定位模式下生效，单次定位模式下不会生效。单位为毫秒。
@@ -104,4 +128,32 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
         mapView.onDestroy();
     }
+
+    @Override
+    public void onMapClick(LatLng latLng) {
+        markerOptions.icon(ICON_RED);
+        markerOptions.title("围栏").snippet(latLng.longitude+","+latLng.latitude).draggable(true);
+        centerLatLng = latLng;
+        addCenterMarker(latLng);
+    }
+
+    private void addCenterMarker(LatLng latLng){
+        if (null == centerMarker){
+            centerMarker = aMap.addMarker(markerOptions);
+        }
+        centerMarker.setPosition(latLng);
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.btn_add_geofence:
+                break;
+            case R.id.btn_clear_geofence:
+
+                break;
+        }
+    }
+
+
 }
